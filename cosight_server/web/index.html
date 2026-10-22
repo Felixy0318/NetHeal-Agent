@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Co-Sight 超级智能体</title>
+    <link rel="icon" href="favicon.ico">
+
+    <script src="libs/d3.v7.min.js"></script>
+    <script src="libs/marked.min.js"></script>
+    <link href="libs/fontawesome-6.7.2/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/landing.css">
+    <link rel="stylesheet" href="styles/md.css">
+    <link rel="stylesheet" href="styles/workspace.css">
+    
+    <!-- 页面刷新时清空localStorage -->
+    <script>
+        // 页面刷新时清空localStorage中的所有内容
+        localStorage.clear();
+        console.log('页面刷新，已清空localStorage');
+    </script>
+</head>
+
+<body class="cosight-app">
+    <div class="container">
+        <div class="header app-header">
+            <a class="header-brand" href="./" aria-label="Co-Sight 首页">
+                <span class="header-brand-mark"><i class="fas fa-robot"></i></span>
+                <div class="header-brand-copy">
+                    <h1>Co-Sight <em>超级智能体</em></h1>
+                    <small>MULTI-AGENT INTELLIGENCE PLATFORM</small>
+                </div>
+            </a>
+
+            <div class="header-context" aria-label="平台运行状态">
+                <span class="header-context-label">当前工作域</span>
+                <strong><i class="fas fa-tower-broadcast"></i> CAMPUS-5G / 通信网络智能化</strong>
+                <span class="header-online"><i></i> Agent Mesh Online</span>
+            </div>
+
+            <div class="header-actions">
+                <a class="netheal-entry" href="netheal.html" title="进入 NetHeal 5G 专网智能运维中心">
+                    <i class="fas fa-wave-square"></i>
+                    <span>NetHeal 运维中心</span>
+                </a>
+                <button class="btn-replay-history" onclick="goToReplayHistory()" title="查看历史任务回放">
+                    <i class="fas fa-clock-rotate-left"></i>
+                    <span>任务回放</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="initial-input-container">
+            <div class="landing-orb landing-orb-one" aria-hidden="true"></div>
+            <div class="landing-orb landing-orb-two" aria-hidden="true"></div>
+            <div class="landing-grid-pattern" aria-hidden="true"></div>
+
+            <main class="landing-content">
+                <section class="welcome-message">
+                    <div class="landing-kicker">
+                        <span class="landing-kicker-dot"></span>
+                        AI-DRIVEN NETWORK OPERATIONS
+                    </div>
+                    <h2 class="welcome-title">让复杂运维任务<br><span>由多智能体协同完成</span></h2>
+                    <p class="welcome-subtitle">从自然语言任务到 DAG 自动规划、工具调用、证据融合与闭环报告，一次完成分析与执行。</p>
+
+                    <div class="capability-list" aria-label="平台核心能力">
+                        <span><i class="fas fa-diagram-project"></i> DAG 自动规划</span>
+                        <span><i class="fas fa-screwdriver-wrench"></i> 10 类通信工具</span>
+                        <span><i class="fas fa-code-branch"></i> 多源证据融合</span>
+                        <span><i class="fas fa-shield-circle-check"></i> 闭环恢复验证</span>
+                    </div>
+
+                    <div class="agent-flow" aria-label="多智能体协作流程">
+                        <div class="agent-flow-title">
+                            <span>NETHEAL AGENT PIPELINE</span>
+                            <strong><i></i> 5 个专业智能体待命</strong>
+                        </div>
+                        <div class="agent-flow-track">
+                            <div class="agent-node active"><i class="fas fa-bell"></i><span>告警解析</span></div>
+                            <div class="agent-connector"></div>
+                            <div class="agent-node"><i class="fas fa-share-nodes"></i><span>拓扑关联</span></div>
+                            <div class="agent-connector"></div>
+                            <div class="agent-node"><i class="fas fa-brain"></i><span>根因定位</span></div>
+                            <div class="agent-connector"></div>
+                            <div class="agent-node"><i class="fas fa-wrench"></i><span>修复决策</span></div>
+                            <div class="agent-connector"></div>
+                            <div class="agent-node"><i class="fas fa-circle-check"></i><span>恢复验证</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="landing-command-card" aria-label="智能体任务输入">
+                    <div class="command-card-header">
+                        <div>
+                            <span class="command-label">NEW AGENT TASK</span>
+                            <h3>描述你希望系统完成的任务</h3>
+                        </div>
+                        <span class="command-ready"><i></i> 模型与工具已就绪</span>
+                    </div>
+
+                    <div class="initial-input-field-container">
+                        <textarea class="initial-textarea" placeholder="例如：诊断 campus-5g 当前视频业务时延升高问题，定位根因并验证恢复效果……" id="initial-message-input" rows="4" maxlength="1200" aria-label="输入智能体任务"></textarea>
+                        <div class="composer-footer">
+                            <div class="composer-meta">
+                                <span><i class="fas fa-wand-magic-sparkles"></i> 支持复杂任务自动拆解</span>
+                                <span><kbd>Enter</kbd> 发送 · <kbd>Shift</kbd> + <kbd>Enter</kbd> 换行</span>
+                            </div>
+                            <div class="composer-actions">
+                                <span class="composer-count"><b id="landing-character-count">0</b>/1200</span>
+                                <button class="initial-send-button" id="initial-send-button" type="button" disabled>
+                                    <span>开始分析</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prompt-section">
+                        <div class="prompt-section-title">
+                            <span>推荐测试任务</span>
+                            <small>点击卡片自动填入</small>
+                        </div>
+                        <div class="prompt-template-grid">
+                            <button class="prompt-template" type="button" data-prompt="请诊断 campus-5g 当前视频业务时延升高问题（测试场景ID：upf-overload，TC-01），关联告警、KPI 和网络拓扑，定位根因，生成修复方案并验证恢复效果。">
+                                <span class="prompt-icon critical"><i class="fas fa-server"></i></span>
+                                <span class="prompt-copy"><strong>UPF 过载诊断</strong><small>TC-01 · 高时延与丢包</small></span>
+                                <i class="fas fa-arrow-up-right-from-square"></i>
+                            </button>
+                            <button class="prompt-template" type="button" data-prompt="请分析 gNodeB-03 小区掉线事件（测试场景ID：backhaul-link-down，TC-02），检查回传链路和邻区影响，定位故障根因，生成安全的仿真恢复方案并验证恢复效果。">
+                                <span class="prompt-icon warning"><i class="fas fa-tower-cell"></i></span>
+                                <span class="prompt-copy"><strong>基站掉线分析</strong><small>TC-02 · 回传链路异常</small></span>
+                                <i class="fas fa-arrow-up-right-from-square"></i>
+                            </button>
+                            <button class="prompt-template" type="button" data-prompt="请评估 campus-5g 的 URLLC 切片资源是否满足工业控制 SLA（测试场景ID：slice-capacity-shortage，TC-03），分析带宽、时延和丢包率，生成资源优化方案并验证恢复效果。">
+                                <span class="prompt-icon violet"><i class="fas fa-layer-group"></i></span>
+                                <span class="prompt-copy"><strong>切片资源优化</strong><small>TC-03 · URLLC SLA</small></span>
+                                <i class="fas fa-arrow-up-right-from-square"></i>
+                            </button>
+                            <button class="prompt-template" type="button" data-prompt="请对 campus-5g 当前告警风暴（测试场景ID：alarm-storm-composite，TC-06）进行压缩和关联分析，识别复合根因、故障传播路径与业务影响范围，生成并验证并行仿真修复方案。">
+                                <span class="prompt-icon cyan"><i class="fas fa-bolt"></i></span>
+                                <span class="prompt-copy"><strong>告警风暴研判</strong><small>TC-06 · 复合故障</small></span>
+                                <i class="fas fa-arrow-up-right-from-square"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="command-card-footer">
+                        <span><i class="fas fa-lock"></i> 当前为安全仿真模式，不会修改真实网元</span>
+                        <a href="settings.html"><i class="fas fa-gear"></i> 检查系统配置</a>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <div class="middle-container">
+
+            <div class="left-container">
+                <div class="progress-overview">
+                    <div class="left-header" id="title-container" style="opacity: 0;">
+                        <div class="workspace-title-copy">
+                            <span class="workspace-eyebrow">MISSION EXECUTION</span>
+                            <h3 id="dynamic-title">多智能体任务执行中</h3>
+                        </div>
+                        <span class="workspace-engine-badge">
+                            <i></i> Co-Sight DAG Engine
+                        </span>
+                    </div>
+                    <div class="progress-stats">
+                        <div class="stat-item" style="color: #4CAF50;">
+                            <div class="stat-number" id="completed-count">0</div>
+                            <div class="stat-label" data-i18n="completed">已完成</div>
+                            <div class="step-list" id="completed-steps"></div>
+                        </div>
+                        <div class="stat-item" style="color: #FF9800;">
+                            <div class="stat-number" id="in-progress-count">0</div>
+                            <div class="stat-label" data-i18n="in_progress">进行中</div>
+                            <div class="step-list" id="in-progress-steps"></div>
+                        </div>
+                        <div class="stat-item" style="color: #f44336;">
+                            <div class="stat-number" id="blocked-count">0</div>
+                            <div class="stat-label" data-i18n="blocked">阻塞</div>
+                            <div class="step-list" id="blocked-steps"></div>
+                        </div>
+                        <div class="stat-item" style="color: #9E9E9E;">
+                            <div class="stat-number" id="not-started-count">6</div>
+                            <div class="stat-label" data-i18n="not_started">未开始</div>
+                            <div class="step-list" id="not-started-steps"></div>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <div class="progress-percentage">
+                            总体进度: <span id="progress-percentage">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dag-container">
+                    <div class="dag-toolbar">
+                        <div class="dag-toolbar-title">
+                            <span class="workspace-eyebrow">MULTI-AGENT ORCHESTRATION</span>
+                            <strong>多智能体协同链路</strong>
+                        </div>
+                        <div class="dag-toolbar-actions">
+                            <button type="button" class="workspace-icon-button" onclick="workspaceFitDag()" title="自动缩放并居中全部节点">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                                <span>适应画布</span>
+                            </button>
+                            <button type="button" class="workspace-icon-button" onclick="workspaceToggleToolDrawer()" title="展开或收起工具执行记录">
+                                <i class="fas fa-screwdriver-wrench"></i>
+                                <span>执行记录</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="controls" style="display: none;">
+                        <button class="btn" onclick="startSimulateWorkflow()">
+                            <i class="fas fa-play-circle"></i> <span class="btn-text">开始运行</span>
+                        </button>
+                        <!-- <button class="btn" onclick="resetProgress()">
+                            <i class="fas fa-undo"></i> <span class="btn-text">重置进度</span>
+                        </button>
+                        <button class="btn" onclick="simulateProgress()">
+                            <i class="fas fa-spinner"></i> <span class="btn-text">模拟进度</span>
+                        </button>
+                        <button class="btn" onclick="simulateStep0Workflow()">
+                            <i class="fa-solid fa-0"></i> <span class="btn-text">模拟STEP0</span>
+                        </button> -->
+                        <button class="btn" onclick="simulateStep5Workflow()">
+                            <i class="fa-solid fa-5"></i> <span class="btn-text">模拟STEP5</span>
+                        </button>
+                        <!-- <button class="btn" onclick="toggleRightContainer()">
+                            <i class="fas fa-columns"></i> <span class="btn-text">切换显示右侧内容</span>
+                        </button> -->
+                        <button class="btn" onclick="testCreateDag()">
+                            <i class="fas fa-flask"></i> <span class="btn-text">测试DAG创建</span>
+                        </button>
+                        <button class="btn" onclick="resetZoom()">
+                            <i class="fas fa-search-minus"></i> <span class="btn-text">重置缩放</span>
+                        </button>
+                        <button class="btn" onclick="fitToScreen()">
+                            <i class="fas fa-expand-arrows-alt"></i> <span class="btn-text">适应屏幕</span>
+                        </button>
+                        <button class="btn" onclick="testLayoutOptimization()">
+                            <i class="fas fa-sitemap"></i> <span class="btn-text">测试布局优化</span>
+                        </button>
+                    </div>
+
+                    <div class="dag-stage" id="dag-stage">
+                        <svg class="dag-svg" id="dag-svg">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="25" refY="0" orient="auto"
+                                viewBox="0 -5 10 10">
+                                <path d="M0,-5L10,0L0,5" fill="#FF9800" />
+                            </marker>
+                        </defs>
+                    </svg>
+
+                    <!-- DAG操作提示 -->
+                    <div class="dag-operation-tip" id="dag-operation-tip">
+                        <div class="tip-content">
+                            <i class="fas fa-mouse-pointer"></i>
+                            <span>滚轮缩放</span>
+                        </div>
+                        <div class="tip-content">
+                            <i class="fas fa-mouse"></i>
+                            <span>按住鼠标拖动</span>
+                        </div>
+                    </div>
+
+                        <div id="tool-call-panels-container" aria-label="工具执行记录抽屉">
+                            <!-- 工具调用面板将动态创建并添加到这里 -->
+                        </div>
+                    </div>
+
+                    <div class="input">
+                        <div class="input-container">
+                            <input type="text" class="input-field" placeholder="请输入你的任务..." id="message-input">
+                            <button class="send-button" id="send-button">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                            <!-- 回放按钮已隐藏 -->
+                            <!-- <button class="send-button" id="replay-button" title="回放上次会话">
+                                <i class="fas fa-rotate-left"></i>
+                            </button> -->
+                        </div>
+                    </div>
+
+                    <div class="step-details" id="step-details" style="display: none;">
+                        <h3 id="step-title">选择节点查看详情</h3>
+                        <p id="step-description">点击上方的节点来查看该步骤的详细信息。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-container" id="right-container">
+                <div class="right-header">
+                    <div class="right-header-title">
+                        <span class="workspace-eyebrow">REPORT &amp; EVIDENCE</span>
+                        <h3><i class="fas fa-file-waveform"></i> 智能报告与证据视图</h3>
+                    </div>
+                    <span id="right-container-status">正在查看文件内容...</span>
+                    <div class="right-header-icons">
+                        <button class="btn-icon" type="button" onclick="workspaceOpenReport()" title="在新窗口打开报告">
+                            <i class="fas fa-arrow-up-right-from-square"></i>
+                        </button>
+                        <button class="btn-icon" type="button" id="toggle-maximize-btn" onclick="toggleMaximizePanel()" title="最大化报告">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                        <button class="btn-icon" type="button" id="close-right-panel-btn" onclick="toggleRightContainer()" title="关闭报告">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="right-content">
+                    <!-- <iframe id="content-iframe" src="https://www.logonews.cn/2025-jiangsu-football-city-league-logo.html" width="100%"
+                        height="100%" frameborder="0"></iframe> -->
+                    <iframe id="content-iframe" width="100%" height="100%" frameborder="0" style="display: none;"></iframe>
+                    <div id="markdown-content"></div>
+                    <!-- 加载中提示 -->
+                    <div id="loading-indicator" class="loading-indicator" style="display: none;">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+    <div class="steps-tooltip" id="steps-tooltip"></div>
+    <div class="verification-tooltip" id="verification-tooltip"></div>
+
+    <!-- 国际化服务脚本 --><script src="js/i18n.js"></script><script src="data/data.js"></script>
+    <script src="js/websocket.js"></script>
+    <script src="js/message.js"></script>
+    <script src="js/steps.js"></script>
+    <script src="js/dag.js"></script>
+    <script src="js/credibility.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/workspace.js"></script>
+    <script src="temp/test.js"></script>
+    <script src="temp/data.js"></script>
+
+    <script src="js/landing.js"></script>
+    <script src="js/init.js"></script>
+    <script src="js/replay-init.js"></script>
+    <script>
+        // 跳转到回放历史页面
+        function goToReplayHistory() {
+            const targetPage = window.location.pathname.includes('/cosight/') 
+                ? 'replay.html' 
+                : '/cosight/replay.html';
+            window.location.href = targetPage;
+        }
+    </script>
+    <script>
+        (function restoreFromStorage() {
+            try {
+                const raw = localStorage.getItem('cosight:lastManusStep');
+                const pendingRaw = localStorage.getItem('cosight:pendingRequests');
+                const pendings = pendingRaw ? JSON.parse(pendingRaw) : {};
+                const pendingTopics = Object.keys(pendings);
+
+                if (!raw && pendingTopics.length === 0) return;
+                const stored = raw ? JSON.parse(raw) : null;
+                const messageData = stored && stored.message;
+
+                // 先切换到主布局（隐藏初始输入区，显示中间容器），不发送新消息
+                if (typeof hideInitialInputAndShowMain === 'function') {
+                    hideInitialInputAndShowMain('');
+                }
+
+                // 等待布局切换动画完成后再恢复 DAG
+                setTimeout(() => {
+                    if (messageData && messageData.data) {
+                        const ok = createDag(messageData);
+                        if (ok && messageData.data.initData && messageData.data.initData.title) {
+                            updateDynamicTitle(messageData.data.initData.title);
+                        }
+                        if (typeof handleResize === 'function') {
+                            setTimeout(() => handleResize(), 50);
+                        }
+                    }
+                }, 400);
+
+                // 等待 WebSocket 连接成功后，恢复订阅；仅在 stillPending===true 时重发
+                const onWsConnected = () => {
+                    try {
+                        pendingTopics.forEach(topic => {
+                            const item = pendings[topic];
+                            if (!item) return;
+
+                            // 包装一次性监听器：首次收到消息后，清除 pending 状态
+                            const originalHandler = window.messageService && window.messageService.receiveMessage
+                                ? window.messageService.receiveMessage
+                                : () => {};
+                            let firstMessageHandled = false;
+                            const wrappedHandler = (evt) => {
+                                if (!firstMessageHandled) {
+                                    firstMessageHandled = true;
+                                    try {
+                                        const latestPendingsRaw = localStorage.getItem('cosight:pendingRequests');
+                                        const latestPendings = latestPendingsRaw ? JSON.parse(latestPendingsRaw) : {};
+                                        if (latestPendings[topic]) {
+                                            latestPendings[topic].stillPending = false;
+                                            localStorage.setItem('cosight:pendingRequests', JSON.stringify(latestPendings));
+                                        }
+                                    } catch (e) {
+                                        console.warn('清除pending失败:', e);
+                                    }
+                                }
+                                try { originalHandler(evt); } catch (e) { /* no-op */ }
+                            };
+
+                            // 只订阅一次（由 WebSocketService 内部去重订阅更佳）
+                            WebSocketService.subscribe(topic, wrappedHandler);
+
+                            // 仅当明确标记 stillPending===true 时才重发，避免刷新导致重复执行
+                            if (item && item.stillPending === true) {
+                                try {
+                                    WebSocketService.sendMessage(topic, JSON.stringify(item.message));
+                                } catch (e) {
+                                    console.warn('重发pending消息失败:', e);
+                                }
+                            }
+                        });
+                    } catch (e) {
+                        console.warn('恢复pending失败:', e);
+                    }
+                };
+                // 如果已经连接，直接执行；否则等待连接事件
+                if (WebSocketService && WebSocketService.isOpen) {
+                    onWsConnected();
+                } else if (WebSocketService && WebSocketService.websocketConnected) {
+                    WebSocketService.websocketConnected.addEventListener('connected', onWsConnected, { once: true });
+                }
+            } catch (e) {
+                console.warn('恢复本地状态失败:', e);
+            }
+        })();
+    </script>
+</body>
+
+</html>
