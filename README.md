@@ -8,7 +8,7 @@ NetHeal-Agent 是基于 Co-Sight 的 5G 校园专网故障诊断与自愈**仿�
 
 - Python 3.11 或更新版本。
 - 首次安装依赖需要访问 Python 软件包源。
-- 使用 Co-Sight 的大模型功能时，在本机将 `.env_template` 复制为 `.env` 并填写所需配置。`.env` 不应提交到 Git。
+- 仓库自带不含个人密钥的 `.env`。使用 Co-Sight 的大模型功能时，在本机填写其中的 `API_KEY`、`API_BASE_URL`、`MODEL_NAME` 等配置。填写真实密钥后，请勿将修改后的 `.env` 提交到 Git。
 
 ## 启动
 
@@ -41,6 +41,6 @@ sh START_NETHEAL.sh
 
 - 故障数据、修复执行和恢复指标均为本地仿真；真实网管接入仍需实现与验证。
 - Docker Compose 默认启用生产鉴权，当前网页尚未接入 Bearer Token 登录；容器部署下的诊断、审批等写操作需要完成前端鉴权适配。
-- `.venv/`、`.env`、日志、运行输出和赛事提交证据不属于公开仓库内容。
+- 仓库中的 `.env` 仅保留空白密钥字段；`.venv/`、日志、运行输出和赛事提交证据不属于公开仓库内容。
 
 项目包含 Co-Sight 原有代码；版权与许可条款见 [LICENSE](LICENSE)。

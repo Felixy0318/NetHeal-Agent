@@ -19,7 +19,6 @@ plans/
 __pycache__
 **/work_space_*
 work_space/**
-.env
 .env.*
 !.env_template
 .cursorindexingignore
